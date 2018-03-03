@@ -1,4 +1,4 @@
-FROM lsiobase/alpine:3.7
+FROM lsiobase/xenial
 
 # set version label
 ARG BUILD_DATE
@@ -6,76 +6,66 @@ ARG VERSION
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="sparklyballs"
 
-RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
-	alsa-lib-dev \
+# environment settings
+ARG DEBIAN_FRONTEND="noninteractive"
+
+# build packages variable
+ARG BUILD_DEPENDENCIES="\
+	antlr3 \
 	autoconf \
-	automake \
-	avahi-dev \
-	bash \
-	bsd-compat-headers \
-	confuse-dev \
-	curl \
-	curl-dev \
-	ffmpeg-dev \
-	file \
-	flac-dev \
-	g++ \
-	gcc \
-	gettext-dev \
-	gnutls-dev \
+	autotools-dev \
+	build-essential \
+	gawk \
+	gettext \
+	git \
 	gperf \
-	json-c-dev \
-	libcurl \
+	libantlr3c-dev \
+	libasound2-dev \
+	libavahi-client-dev \
+	libavcodec-dev \
+	libavfilter-dev \
+	libavformat-dev \
+	libavutil-dev \
+	libconfuse-dev \
+	libcurl4-gnutls-dev \
 	libevent-dev \
-	libgcrypt-dev \
-	libogg-dev \
+	libgcrypt11-dev \
+	libgnutls-dev \
+	libjson-c-dev \
+	libmxml-dev \
 	libplist-dev \
+	libprotobuf-c-dev \
 	libsodium-dev \
+	libsqlite3-dev \
+	libswscale-dev \
 	libtool \
 	libunistring-dev \
-	make \
-	openjdk8-jre-base \
-	protobuf-c-dev \
-	sqlite-dev \
-	taglib-dev \
-	tar && \
- apk add --no-cache --virtual=build-dependencies \
-	--repository http://nl.alpinelinux.org/alpine/edge/testing \
-	libantlr3c-dev \
-	mxml-dev && \
- echo "**** install runtime packages ****" && \
- apk add --no-cache \
-	avahi \
-	confuse \
-	dbus \
+	libwebsockets-dev \
+	zlib1g-dev"
+
+# runtime packages variable
+ARG RUNTIME_DEPENDENCIES="\
+	avahi-daemon \
+	dbus\
 	ffmpeg \
-	json-c \
-	libcurl \
-	libevent \
-	libgcrypt \
-	libplist \
-	libsodium \
-	libunistring \
-	protobuf-c \
-	sqlite \
-	sqlite-libs && \
- apk add --no-cache \
-	--repository http://nl.alpinelinux.org/alpine/edge/testing \
-	libantlr3c \
-	mxml && \
- echo "**** make antlr wrapper and compile forked-daapd ****" && \
+	libantlr3c-antlrdbg-3.2-0 \
+	libavahi-client3 \
+	libconfuse0\
+	libevent-2.0-5 \
+	libevent-pthreads-2.0-5 \
+	libmxml1 \
+	libplist++3v5 \
+	libprotobuf-c1 \
+	libunistring0"
+
+RUN \
+ echo "**** install build packages ****" && \
+ apt-get update && \
+ apt-get install -y \
+ 	$BUILD_DEPENDENCIES && \
+ echo "**** compile forked-daapd ****" && \
  mkdir -p \
 	/tmp/source/forked-daapd && \
- echo \
-	"#!/bin/bash" > /tmp/source/antlr3 && \
- echo \
-	"exec java -cp /tmp/source/antlr-3.4-complete.jar org.antlr.Tool \"\$@\"" >> /tmp/source/antlr3 && \
- chmod a+x /tmp/source/antlr3 && \
- curl -o \
- /tmp/source/antlr-3.4-complete.jar -L \
-	http://www.antlr3.org/download/antlr-3.4-complete.jar && \
  DAAPD_VER=$(curl -sX GET "https://api.github.com/repos/ejurgensen/forked-daapd/releases/latest" \
 	| awk '/tag_name/{print $4;exit}' FS='[""]') && \
  curl -o \
@@ -87,12 +77,10 @@ RUN \
  cd /tmp/source/forked-daapd && \
  autoreconf -i -v && \
  ./configure \
-	--build=$CBUILD \
 	--enable-chromecast \
 	--enable-itunes \
 	--enable-lastfm \
 	--enable-mpd \
-	--host=$CHOST \
 	--infodir=/usr/share/info \
 	--localstatedir=/var \
 	--mandir=/usr/share/man \
@@ -101,11 +89,20 @@ RUN \
  make && \
  make install && \
  cp /etc/forked-daapd.conf /etc/forked-daapd.conf.orig && \
+ echo "**** uninstall build packages ****" && \
+ apt-get purge -y --auto-remove \
+	$BUILD_DEPENDENCIES && \
+ echo "**** install runtime packages ****" && \
+ apt-get update && \
+ apt-get install -y \
+	--no-install-recommends \
+	--no-install-suggests \
+	$RUNTIME_DEPENDENCIES && \
  echo "**** cleanup ****" && \
- apk del --purge \
-	build-dependencies && \
  rm -rf \
-	/tmp/*
+	/tmp/* \
+	/var/lib/apt/lists/* \
+	/var/tmp/*
 
 # copy local files
 COPY root/ /

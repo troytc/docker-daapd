@@ -45,7 +45,7 @@ http://192.168.x.x:8080 would show you what's running INSIDE the container on po
 * `-e PGID` for GroupID - see below for explanation
 * `-e PUID` for UserID - see below for explanation
 
-It is based on alpine linux with s6 overlay, for shell access whilst the container is running do `docker exec -it daapd /bin/bash`.
+It is based on ubuntu xenial with s6 overlay, for shell access whilst the container is running do `docker exec -it daapd /bin/bash`.
 
 ### User / Group Identifiers
 
@@ -81,6 +81,7 @@ For further setup options of remotes etc, check out the daapd website, [Forked-d
 
 ## Versions
 
++ **03.03.18:** Rebase to xenial because v26 not working with alpine.
 + **25.02.18:** Query version before pull and build latest release.
 + **03.01.18:** Deprecate cpu_core routine lack of scaling.
 + **07.12.17:** Rebase to alpine linux 3.7.
