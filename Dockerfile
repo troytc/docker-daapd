@@ -27,7 +27,6 @@ RUN \
 	libgcrypt-dev \
 	libogg-dev \
 	libplist-dev \
-	pulseaudio-dev \
 	libressl-dev \
 	libsodium-dev \
 	libtool \
@@ -36,6 +35,7 @@ RUN \
 	make \
 	openjdk8-jre-base \
 	protobuf-c-dev \
+	pulseaudio-dev \
 	sqlite-dev \
 	taglib-dev \
 	tar && \
@@ -107,6 +107,7 @@ RUN \
 	libunistring \
 	libwebsockets \
 	protobuf-c \
+	pulseaudio \
 	sqlite \
 	sqlite-libs && \
  apk add --no-cache \
