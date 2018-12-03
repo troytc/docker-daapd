@@ -71,7 +71,7 @@ RUN \
 	--enable-itunes \
 	--enable-lastfm \
 	--enable-mpd \
-	--enable-pulseaudio \
+	--with-pulseaudio \
 	--host=$CHOST \
 	--infodir=/usr/share/info \
 	--localstatedir=/var \
