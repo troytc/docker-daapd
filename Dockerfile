@@ -27,6 +27,7 @@ RUN \
 	libgcrypt-dev \
 	libogg-dev \
 	libplist-dev \
+	libpulse-dev \
 	libressl-dev \
 	libsodium-dev \
 	libtool \
@@ -70,6 +71,7 @@ RUN \
 	--enable-itunes \
 	--enable-lastfm \
 	--enable-mpd \
+	--enable-pulseaudio \
 	--host=$CHOST \
 	--infodir=/usr/share/info \
 	--localstatedir=/var \
