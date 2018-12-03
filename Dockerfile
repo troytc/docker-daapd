@@ -27,7 +27,7 @@ RUN \
 	libgcrypt-dev \
 	libogg-dev \
 	libplist-dev \
-	libpulse-dev \
+	pulseaudio-dev \
 	libressl-dev \
 	libsodium-dev \
 	libtool \
